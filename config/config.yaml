@@ -1,0 +1,36 @@
+# config.yaml
+app:
+  name: "AI Blockchain Framework"
+  version: "0.0.3"
+  environment: "development"  # Options: development, testing, production
+
+logging:
+  level: "DEBUG"  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "logs/app.log"
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "aiblockchain_db"
+  user: "db_user"
+  password: "db_password"
+
+blockchain:
+  network: "evire"  # You can set whatever network EVM compatible
+  node_url: "http://testnet-rpc.evire.io:8545"
+  gas_limit: 3000000
+  gas_price: 20000000000
+
+ai:
+  model_path: "models/dev_model.h5"
+  inference_batch_size: 32
+
+security:
+  api_key: "your_api_key_here"
+  jwt_secret: "your_jwt_secret_here"
+  encryption_key: "your_encryption_key_here"
+
+
+performance:
+  max_threads: 8
+  timeout_seconds: 30

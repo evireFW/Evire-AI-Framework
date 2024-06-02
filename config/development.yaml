@@ -1,0 +1,33 @@
+# development.yaml
+app:
+  environment: "development"
+
+logging:
+  level: "DEBUG"
+  file: "logs/development.log"
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "aiblockchain_dev_db"
+  user: "dev_user"
+  password: "dev_password"
+
+blockchain:
+  network: "Evire testnet"
+  node_url: "http://testnet-rpc.evire.io:8545"
+  gas_limit: 3000000
+  gas_price: 20000000000
+
+ai:
+  model_path: "models/dev_model.h5"
+  inference_batch_size: 32
+
+security:
+  api_key: "dev_api_key_here"
+  jwt_secret: "dev_jwt_secret_here"
+  encryption_key: "dev_encryption_key_here"
+
+performance:
+  max_threads: 4
+  timeout_seconds: 60
