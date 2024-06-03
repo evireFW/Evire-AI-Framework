@@ -28,7 +28,7 @@ Usage
 
   1.	Clone the repository:
 
-    git clone https://github.com/evireFW/AI-Framework.git 
+    git clone https://github.com/evireFW/Evire-AI-Framework.git 
     cd examples
     
   2.	Install the required packages
