@@ -6,29 +6,28 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
 from sklearn.model_selection import train_test_split
 
-
 # Download historical data for ETH
-eth_data = yf.download('ETH-USD', start='2020-01-01', end='2024-05-25')
+eth_data = yf.download('ETH-USD', start='2020-01-01', end='2024-06-05')
 
-# We save the data to a file CSV
+# Save the data to a CSV file
 eth_data.to_csv('eth_data.csv')
 
-# We read the data from the file CSV
+# Read the data from the CSV file
 data = pd.read_csv('eth_data.csv')
 
-# We select only the "Close" column for prediction
+# Select only the "Close" column for prediction
 data = data[['Close']]
 
 # Normalize the data
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(data)
 
-# We create datasets for training and testing
+# Create datasets for training and testing
 train_data_len = int(len(scaled_data) * 0.8)
 train_data = scaled_data[:train_data_len]
 test_data = scaled_data[train_data_len:]
 
-# We create the training data
+# Create the training data
 def create_dataset(data, time_step=1):
     X, Y = [], []
     for i in range(len(data) - time_step):
@@ -37,52 +36,58 @@ def create_dataset(data, time_step=1):
     return np.array(X), np.array(Y)
 
 time_step = 100
-X, y = create_dataset(train_data, time_step)
+X_evire, y_evire = create_dataset(train_data, time_step)
 
-# We split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split the data into training and validation sets
+X_train_evire, X_val_evire, y_train_evire, y_val_evire = train_test_split(X_evire, y_evire, test_size=0.2, random_state=42)
 
 # Reshape for compatibility with LSTM [samples, time steps, features]
-X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
-X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
-X_test, y_test = create_dataset(test_data, time_step)
-X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
+X_train_evire = X_train_evire.reshape(X_train_evire.shape[0], X_train_evire.shape[1], 1)
+X_val_evire = X_val_evire.reshape(X_val_evire.shape[0], X_val_evire.shape[1], 1)
+X_test_evire, y_test_evire = create_dataset(test_data, time_step)
+X_test_evire = X_test_evire.reshape(X_test_evire.shape[0], X_test_evire.shape[1], 1)
 
-# We build the LSTM model
-model = Sequential()
-model.add(LSTM(50, return_sequences=True, input_shape=(time_step, 1)))
-model.add(LSTM(50, return_sequences=False))
-model.add(Dense(25))
-model.add(Dense(1))
+# Build the LSTM model
+model_evire = Sequential()
+model_evire.add(LSTM(50, return_sequences=True, input_shape=(time_step, 1)))
+model_evire.add(LSTM(50, return_sequences=False))
+model_evire.add(Dense(25))
+model_evire.add(Dense(1))
 
 # Compile the model
-model.compile(optimizer='adam', loss='mean_squared_error')
+model_evire.compile(optimizer='adam', loss='mean_squared_error')
 
-# We train the model
-model.fit(X_train, y_train, validation_data=(X_val, y_val), batch_size=1, epochs=50)
+# Train the model
+model_evire.fit(X_train_evire, y_train_evire, validation_data=(X_val_evire, y_val_evire), batch_size=1, epochs=50)
 
-# We make predictions on the test data set
-predictions = model.predict(X_test)
-predictions = scaler.inverse_transform(predictions)
+# Make predictions on the test dataset
+predictions_evire = model_evire.predict(X_test_evire)
+predictions_evire = scaler.inverse_transform(predictions_evire)
 
-# We calculate the root mean square error
-rmse = np.sqrt(np.mean((predictions - y_test.reshape(-1, 1))**2))
-print(f'RMSE: {rmse}')
+# Calculate the root mean square error
+rmse_evire = np.sqrt(np.mean((predictions_evire - y_test_evire.reshape(-1, 1))**2))
+print(f'RMSE: {rmse_evire}')
 
 # Prediction for the next 30 days
-last_100_days = data[-100:].values
-last_100_days_scaled = scaler.transform(last_100_days)
+last_100_days_evire = data[-100:].values
+last_100_days_scaled_evire = scaler.transform(last_100_days_evire)
 
-X_input = last_100_days_scaled.reshape(1, -1)
-X_input = X_input.reshape((1, 100, 1))
+X_input_evire = last_100_days_scaled_evire.reshape(1, -1)
+X_input_evire = X_input_evire.reshape((1, 100, 1))
 
-future_predictions = []
+future_predictions_evire = []
 for i in range(30):
-    pred = model.predict(X_input, verbose=0)
-    future_predictions.append(pred[0, 0])
-    # Prepare X_input for the next prediction
-    X_input = np.append(X_input[:, 1:, :], np.reshape(pred, (1, 1, 1)), axis=1)
+    pred_evire = model_evire.predict(X_input_evire, verbose=0)
+    future_predictions_evire.append(pred_evire[0, 0])
+    # Prepare X_input_evire for the next prediction
+    X_input_evire = np.append(X_input_evire[:, 1:, :], np.reshape(pred_evire, (1, 1, 1)), axis=1)
 
-# We reverse the predictions
-future_predictions = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
-print(future_predictions)
+# Reverse the predictions
+future_predictions_evire = scaler.inverse_transform(np.array(future_predictions_evire).reshape(-1, 1))
+
+# Print the predictions
+print("EVIRE ETH Price Predictions No Sentiment")
+last_date = pd.to_datetime(data.index[-1])
+prediction_dates = [last_date + pd.DateOffset(days=i) for i in range(1, 31)]
+for date, price in zip(prediction_dates, future_predictions_evire):
+    print(f"{date.date()}: {price[0]}")
