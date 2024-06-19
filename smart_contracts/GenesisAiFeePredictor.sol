@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT 
 // Work in progress 0.0.21 - Updated 3 Jun
 pragma solidity ^0.8.0;
 
