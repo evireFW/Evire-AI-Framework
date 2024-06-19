@@ -16,45 +16,67 @@ contract ModelManagement {
     event ModelAdded(address indexed creator, string modelHash, string modelURI, uint256 timestamp);
     event ModelUpdated(address indexed creator, string modelHash, string newModelURI, uint256 timestamp);
 
-    // Function to add a new model
+    /**
+     * @dev Adds a new model to the sender's model list
+     * @param modelHash The unique hash of the model
+     * @param modelURI The URI pointing to the model's metadata
+     */
     function addModel(string memory modelHash, string memory modelURI) public {
-        Model memory newModel = Model({
+        require(bytes(modelHash).length > 0, "Model hash is required");
+        require(bytes(modelURI).length > 0, "Model URI is required");
+
+        models[msg.sender].push(Model({
             modelHash: modelHash,
             modelURI: modelURI,
             timestamp: block.timestamp
-        });
+        }));
 
-        models[msg.sender].push(newModel);
         emit ModelAdded(msg.sender, modelHash, modelURI, block.timestamp);
     }
 
-    // Function to update an existing model
+    /**
+     * @dev Updates an existing model in the sender's model list
+     * @param modelHash The unique hash of the model to be updated
+     * @param newModelURI The new URI pointing to the model's updated metadata
+     */
     function updateModel(string memory modelHash, string memory newModelURI) public {
+        require(bytes(modelHash).length > 0, "Model hash is required");
+        require(bytes(newModelURI).length > 0, "New model URI is required");
+
         Model[] storage userModels = models[msg.sender];
         bool updated = false;
-        uint256 timestamp = 0;
 
         for (uint256 i = 0; i < userModels.length; i++) {
             if (keccak256(abi.encodePacked(userModels[i].modelHash)) == keccak256(abi.encodePacked(modelHash))) {
                 userModels[i].modelURI = newModelURI;
                 userModels[i].timestamp = block.timestamp;
                 updated = true;
-                timestamp = block.timestamp;
+                emit ModelUpdated(msg.sender, modelHash, newModelURI, block.timestamp);
                 break;
             }
         }
 
         require(updated, "ModelManagement: model not found");
-        emit ModelUpdated(msg.sender, modelHash, newModelURI, timestamp);
     }
 
-    // Function to get all models of a creator
+    /**
+     * @dev Returns all models created by the specified address
+     * @param creator The address of the model creator
+     * @return An array of Model structs
+     */
     function getModels(address creator) public view returns (Model[] memory) {
         return models[creator];
     }
 
-    // Function to verify the existence of a model
+    /**
+     * @dev Verifies the existence of a model by its hash and creator's address
+     * @param creator The address of the model creator
+     * @param modelHash The unique hash of the model
+     * @return A boolean indicating whether the model exists
+     */
     function verifyModel(address creator, string memory modelHash) public view returns (bool) {
+        require(bytes(modelHash).length > 0, "Model hash is required");
+
         Model[] memory userModels = models[creator];
         for (uint256 i = 0; i < userModels.length; i++) {
             if (keccak256(abi.encodePacked(userModels[i].modelHash)) == keccak256(abi.encodePacked(modelHash))) {
