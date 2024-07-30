@@ -1,0 +1,1 @@
+The Distributed AI Training Client connects to a central server to receive and process tasks. By contributing your computing power, you help train AI models in a collaborative and distributed manner. This approach leverages the idle computational resources of many users to create a powerful, decentralized AI training network.
